@@ -2,83 +2,107 @@
 
 namespace App\Http\Controllers;
 
+use App\Task;
 use Illuminate\Http\Request;
+use App\Http\Requests\TaskRequest;
 
 class TaskController extends Controller
-{
+{    
     /**
-     * Display a listing of the resource.
+     * __construct
      *
-     * @return \Illuminate\Http\Response
+     * @return void
      */
-    public function index()
+    public function __construct()
     {
-        
+        $this->middleware('auth');
     }
-
+        
     /**
-     * Show the form for creating a new resource.
+     * Show all user's task
      *
-     * @return \Illuminate\Http\Response
+     * @param  mixed $task
+     * @return void
+     */
+    public function index(Task $task)
+    {
+        $user_id = auth()->user()->id;
+        $tasks = $task->where('user_id', $user_id)->orderByDesc('updated_at')->paginate(5);
+        return view('tasks.index', compact('tasks'));
+    }
+    
+    /**
+     * Show form for create new task
+     *
+     * @return void
      */
     public function create()
     {
-        //
+        return view('tasks.create');
+    }
+    
+    /**
+     * Store new task to DB
+     *
+     * @param  mixed $request
+     * @param  mixed $task
+     * @return void
+     */
+    public function store(TaskRequest $request, Task $task)
+    {
+        $request->validated();
+        $task->create($request->all());
+        return redirect()->route('tasks.index')
+                            ->with('status','Task created successfully');
+    }
+    
+    /**
+     * Display current selected task
+     *
+     * @param  mixed $task
+     * @return void
+     */
+    public function show(Task $task)
+    {
+        return view('tasks.show',compact('task'));
+    }
+    
+    /**
+     * Show form for edit current selected task
+     *
+     * @param  mixed $task
+     * @return void
+     */
+    public function edit(Task $task)
+    {
+        return view('tasks.edit',compact('task'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Update current selected task
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  mixed $request
+     * @param  mixed $task
+     * @return void
      */
-    public function store(Request $request)
+    public function update(TaskRequest $request, Task $task)
     {
-        //
+        $request->validated();
+        $task->update($request->all());
+        return redirect()->route('tasks.index')
+                            ->with('status','Task updated successfully');
     }
-
+    
     /**
-     * Display the specified resource.
+     * Remove selected current task from DB
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed $task
+     * @return void
      */
-    public function show($id)
+    public function destroy(Task $task)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        $task->delete();
+        return redirect()->route('tasks.index')
+                            ->with('status','Task deleted successfully');
     }
 }

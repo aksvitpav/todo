@@ -19,7 +19,9 @@
         <main class="py-4">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-9">
+                    <div class="col-12">
+                        @include('includes.success')
+                        @include('includes.error')
                         @yield('content')
                     </div>
                 </div>

@@ -1,0 +1,1 @@
+<a type="button" class="btn btn-sm btn-primary mt-2" href="{{ url()->previous() }}">Back</a>
